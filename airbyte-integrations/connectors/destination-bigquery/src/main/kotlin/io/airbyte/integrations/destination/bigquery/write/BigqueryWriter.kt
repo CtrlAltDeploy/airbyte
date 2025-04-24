@@ -8,6 +8,7 @@ import com.google.cloud.bigquery.BigQuery
 import io.airbyte.cdk.load.orchestration.db.direct_load_table.DefaultDirectLoadTableSqlOperations
 import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableExecutionConfig
 import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableWriter
+import io.airbyte.cdk.load.orchestration.db.direct_load_table.migrations.DefaultDirectLoadTableTempTableNameMigration
 import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TableCatalog
 import io.airbyte.cdk.load.write.StreamStateStore
 import io.airbyte.integrations.destination.bigquery.spec.BigqueryConfiguration
@@ -27,16 +28,19 @@ class BigqueryWriterFactory(
     @Singleton
     fun make(): DirectLoadTableWriter {
         val destinationHandler = BigQueryDatabaseHandler(bigquery, config.datasetLocation.region)
+        val sqlTableOperations =
+            DefaultDirectLoadTableSqlOperations(
+                BigQuerySqlGenerator(config.projectId, config.datasetLocation.region),
+                destinationHandler,
+            )
         return DirectLoadTableWriter(
             names,
             BigqueryDatabaseInitialStatusGatherer(bigquery),
             destinationHandler,
             TODO(),
-            DefaultDirectLoadTableSqlOperations(
-                BigQuerySqlGenerator(config.projectId, config.datasetLocation.region),
-                destinationHandler,
-            ),
+            sqlTableOperations,
             streamStateStore,
+            DefaultDirectLoadTableTempTableNameMigration(TODO(), sqlTableOperations)
         )
     }
 }
