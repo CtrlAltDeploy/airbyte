@@ -37,10 +37,13 @@ class BigqueryWriterFactory(
             names,
             BigqueryDatabaseInitialStatusGatherer(bigquery),
             destinationHandler,
-            TODO(),
+            BigqueryDirectLoadTableNativeOperations(bigquery),
             sqlTableOperations,
             streamStateStore,
-            DefaultDirectLoadTableTempTableNameMigration(TODO(), sqlTableOperations)
+            DefaultDirectLoadTableTempTableNameMigration(
+                BigqueryDirectLoadTableExistenceChecker(bigquery),
+                sqlTableOperations,
+            )
         )
     }
 }
