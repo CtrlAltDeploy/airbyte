@@ -5,10 +5,10 @@
 package io.airbyte.integrations.destination.bigquery.write
 
 import com.google.cloud.bigquery.BigQuery
+import io.airbyte.cdk.load.orchestration.db.direct_load_table.DefaultDirectLoadTableSqlOperations
+import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableExecutionConfig
+import io.airbyte.cdk.load.orchestration.db.direct_load_table.DirectLoadTableWriter
 import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TableCatalog
-import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingExecutionConfig
-import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingFinalTableOperations
-import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingWriter
 import io.airbyte.cdk.load.write.StreamStateStore
 import io.airbyte.integrations.destination.bigquery.spec.BigqueryConfiguration
 import io.airbyte.integrations.destination.bigquery.typing_deduping.BigQueryDatabaseHandler
@@ -22,22 +22,21 @@ class BigqueryWriterFactory(
     private val bigquery: BigQuery,
     private val config: BigqueryConfiguration,
     private val names: TableCatalog,
-    private val streamStateStore: StreamStateStore<TypingDedupingExecutionConfig>,
+    private val streamStateStore: StreamStateStore<DirectLoadTableExecutionConfig>,
 ) {
     @Singleton
-    fun make(): TypingDedupingWriter {
+    fun make(): DirectLoadTableWriter {
         val destinationHandler = BigQueryDatabaseHandler(bigquery, config.datasetLocation.region)
-        return TypingDedupingWriter(
+        return DirectLoadTableWriter(
             names,
             BigqueryDatabaseInitialStatusGatherer(bigquery),
             destinationHandler,
-            BigqueryRawTableOperations(bigquery),
-            TypingDedupingFinalTableOperations(
+            TODO(),
+            DefaultDirectLoadTableSqlOperations(
                 BigQuerySqlGenerator(config.projectId, config.datasetLocation.region),
                 destinationHandler,
             ),
-            disableTypeDedupe = config.disableTypingDeduping,
-            streamStateStore
+            streamStateStore,
         )
     }
 }
