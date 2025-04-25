@@ -9,6 +9,7 @@ import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TableCatalog
 import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingExecutionConfig
 import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingFinalTableOperations
 import io.airbyte.cdk.load.orchestration.db.legacy_typing_deduping.TypingDedupingWriter
+import io.airbyte.cdk.load.write.DestinationWriter
 import io.airbyte.cdk.load.write.StreamStateStore
 import io.airbyte.integrations.destination.bigquery.spec.BigqueryConfiguration
 import io.airbyte.integrations.destination.bigquery.typing_deduping.BigQueryDatabaseHandler
@@ -25,7 +26,7 @@ class BigqueryWriterFactory(
     private val streamStateStore: StreamStateStore<TypingDedupingExecutionConfig>,
 ) {
     @Singleton
-    fun make(): TypingDedupingWriter {
+    fun make(): DestinationWriter {
         val destinationHandler = BigQueryDatabaseHandler(bigquery, config.datasetLocation.region)
         return TypingDedupingWriter(
             names,
@@ -36,7 +37,7 @@ class BigqueryWriterFactory(
                 BigQuerySqlGenerator(config.projectId, config.datasetLocation.region),
                 destinationHandler,
             ),
-            disableTypeDedupe = config.disableTypingDeduping,
+            disableTypeDedupe = true,
             streamStateStore
         )
     }
