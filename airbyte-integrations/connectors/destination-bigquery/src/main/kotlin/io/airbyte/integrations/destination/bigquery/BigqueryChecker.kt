@@ -6,11 +6,13 @@ package io.airbyte.integrations.destination.bigquery
 
 import io.airbyte.cdk.load.check.DestinationChecker
 import io.airbyte.integrations.destination.bigquery.spec.BigqueryConfiguration
+import javax.inject.Named
 import javax.inject.Singleton
 
 @Singleton
+@Named("clientProvidedChecker")
 class BigqueryChecker : DestinationChecker<BigqueryConfiguration> {
     override fun check(config: BigqueryConfiguration) {
-        // TODO implement a real checker in the CDK; kill this class
+        println("Do I go here?")
     }
 }

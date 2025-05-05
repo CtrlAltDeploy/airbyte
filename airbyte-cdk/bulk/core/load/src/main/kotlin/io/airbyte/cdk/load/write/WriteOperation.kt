@@ -13,9 +13,10 @@ import io.airbyte.cdk.load.task.TaskLauncher
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micronaut.context.annotation.Factory
 import io.micronaut.context.annotation.Requires
-import io.micronaut.context.annotation.Secondary
+import jakarta.inject.Named
+import jakarta.inject.Singleton
+import java.io.ByteArrayInputStream
 import java.io.InputStream
-import javax.inject.Singleton
 import kotlinx.coroutines.runBlocking
 
 /**
@@ -74,9 +75,18 @@ class WriteOperation(
 @Factory
 class InputStreamProvider {
     @Singleton
-    @Secondary
+    @Named("inputStreamProvider")
     @Requires(property = Operation.PROPERTY, value = "write")
-    fun make(): InputStream {
+    fun makeWrite(): InputStream {
         return System.`in`
+    }
+
+    @Singleton
+    @Named("inputStreamProvider")
+    @Requires(property = Operation.PROPERTY, value = "check")
+    fun makeCheck(): InputStream {
+        // We create fake data here that would be passed to the ByteArrayInputStream
+        val test = "test".toByteArray()
+        return ByteArrayInputStream(test)
     }
 }

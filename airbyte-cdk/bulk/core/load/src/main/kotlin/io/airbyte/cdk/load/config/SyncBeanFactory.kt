@@ -4,9 +4,14 @@
 
 package io.airbyte.cdk.load.config
 
+import io.airbyte.cdk.Operation
+import io.airbyte.cdk.load.check.DestinationChecker
+import io.airbyte.cdk.load.check.DestinationCheckerSync
+import io.airbyte.cdk.load.command.Append
 import io.airbyte.cdk.load.command.DestinationCatalog
 import io.airbyte.cdk.load.command.DestinationConfiguration
 import io.airbyte.cdk.load.command.DestinationStream
+import io.airbyte.cdk.load.data.ObjectTypeWithoutSchema
 import io.airbyte.cdk.load.message.BatchEnvelope
 import io.airbyte.cdk.load.message.ChannelMessageQueue
 import io.airbyte.cdk.load.message.DestinationRecordRaw
@@ -22,6 +27,7 @@ import io.airbyte.cdk.load.task.implementor.FileTransferQueueMessage
 import io.airbyte.cdk.load.write.LoadStrategy
 import io.github.oshai.kotlinlogging.KotlinLogging
 import io.micronaut.context.annotation.Factory
+import io.micronaut.context.annotation.Requires
 import io.micronaut.context.annotation.Secondary
 import io.micronaut.context.annotation.Value
 import jakarta.inject.Named
@@ -159,4 +165,36 @@ class SyncBeanFactory {
     @Singleton
     @Named("defaultDestinationTaskLauncherHasThrown")
     fun defaultDestinationTaskLauncherHasThrown(): AtomicBoolean = AtomicBoolean(false)
+
+    /* *****
+     * CHECK
+     * *****/
+
+    @Singleton
+    @Named("destinationChecker")
+    @Requires(property = Operation.PROPERTY, value = "check")
+    fun <C : DestinationConfiguration> destinationChecker(
+        @Named("clientProvidedChecker") clientProvided: DestinationChecker<C>? = null,
+        //                           taskLauncher: DestinationTaskLauncher,
+        //                           syncManager: SyncManager
+        ): DestinationChecker<*> {
+        return clientProvided ?: DestinationCheckerSync()
+    }
+
+    @Singleton
+    @Requires(property = Operation.PROPERTY, value = "check")
+    fun fakeCheckSyncCatalog(): DestinationCatalog {
+        return DestinationCatalog(
+            listOf(
+                DestinationStream(
+                    descriptor = DestinationStream.Descriptor("testing", "test"),
+                    importType = Append,
+                    schema = ObjectTypeWithoutSchema,
+                    generationId = 1,
+                    minimumGenerationId = 0,
+                    syncId = 1,
+                )
+            )
+        )
+    }
 }

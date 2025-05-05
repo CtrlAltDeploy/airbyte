@@ -34,3 +34,13 @@ interface DestinationChecker<C : DestinationConfiguration> {
     fun check(config: C)
     fun cleanup() {}
 }
+
+class DestinationCheckerSync : DestinationChecker<DestinationConfiguration> {
+    override fun check(config: DestinationConfiguration) {
+        println("this is a sync check test")
+    }
+
+    override fun cleanup() {
+        println("this is a sync check test cleanup")
+    }
+}
