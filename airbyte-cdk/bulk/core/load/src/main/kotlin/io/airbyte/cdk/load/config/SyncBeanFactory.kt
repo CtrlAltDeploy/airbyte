@@ -174,10 +174,8 @@ class SyncBeanFactory {
     @Named("destinationChecker")
     @Requires(property = Operation.PROPERTY, value = "check")
     fun <C : DestinationConfiguration> destinationChecker(
-        @Named("clientProvidedChecker") clientProvided: DestinationChecker<C>? = null,
-        //                           taskLauncher: DestinationTaskLauncher,
-        //                           syncManager: SyncManager
-        ): DestinationChecker<*> {
+        @Named("clientProvidedChecker") clientProvided: DestinationChecker<C>? = null
+    ): DestinationChecker<*> {
         return clientProvided ?: DestinationCheckerSync()
     }
 
